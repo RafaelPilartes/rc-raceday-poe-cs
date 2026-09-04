@@ -1,0 +1,19 @@
+# Build output
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+
+# User-specific and IDE files
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Local configuration and secrets
+appsettings.Development.json
+*.env
+
+# OS files
+.DS_Store
+Thumbs.db
