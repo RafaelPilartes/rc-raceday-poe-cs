@@ -141,3 +141,46 @@ VALUES
     (1, 'Cape Town Coastal 10K', 'A flat, scenic 10km run along the Sea Point promenade.', '2026-06-15 07:00:00', 'Sea Point Promenade, Cape Town', 10.00, 'Run', NULL),
     (1, 'Joburg City Cycle Challenge', 'Road cycling event through Sandton and surrounds, with 42km and 21km routes.', '2026-11-08 06:30:00', 'Sandton, Johannesburg', 42.00, 'Cycle', NULL),
     (2, 'Durban Beachfront Walkathon', 'Family-friendly 5km walk along the Durban beachfront in support of local charities.', '2026-12-06 08:00:00', 'Durban Beachfront', 5.00, 'Walk', NULL);
+
+INSERT INTO dbo.Categories (
+    EventID,
+    CategoryName,
+    MinAge,
+    MaxAge,
+    DistanceKm
+)
+VALUES
+    (1, 'Under 20', 10, 19, 10.00),
+    (1, 'Open 20-39', 20, 39, 10.00),
+    (1, 'Veteran 40+', 40, 99, 10.00),
+    (2, '42km Open', NULL, NULL, 42.00),
+    (2, '21km Open', NULL, NULL, 21.00),
+    (3, 'Family Walk', NULL, NULL, 5.00),
+    (3, 'Senior Walk 60+', 60, 120, 5.00);
+
+-- CategoryID 2 = Open 20-39 (Event 1), CategoryID 5 = 21km Open (Event 2),
+-- CategoryID 6 = Family Walk (Event 3), matching the inserts above in order.
+INSERT INTO dbo.Enrolments (
+    ParticipantID,
+    EventID,
+    CategoryID,
+    Status
+)
+VALUES
+    (3, 1, 2, 'Confirmed'),
+    (4, 1, 2, 'Confirmed'),
+    (3, 2, 5, 'Confirmed'),
+    (4, 3, 6, 'Pending');
+
+-- Results only exist for the Cape Town Coastal 10K (EventID 1), the one event
+-- with a date already in the past. The other two events have not happened
+-- yet, so their enrolments correctly have no matching row here.
+INSERT INTO dbo.Results (
+    EnrolmentID,
+    FinishTime,
+    FinishingPosition,
+    CapturedAt
+)
+VALUES
+    (1, '00:52:18', 47, '2026-06-15 10:15:00'),
+    (2, '00:58:03', 112, '2026-06-15 10:20:00');
