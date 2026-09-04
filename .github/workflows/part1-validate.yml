@@ -1,0 +1,85 @@
+name: Part 1 validation
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    name: Validate Part 1 documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Required files are present
+        run: |
+          set -euo pipefail
+          status=0
+          for f in \
+            docs/RaceDay_ERD.png \
+            docs/RaceDay_API_Endpoint_Plan.md \
+            docs/raceday_schema.sql
+          do
+            if [ -s "$f" ]; then
+              echo "ok       $f"
+            else
+              echo "MISSING  $f (absent or empty)"
+              status=1
+            fi
+          done
+          exit $status
+
+      - name: API endpoint plan covers all six areas
+        run: |
+          set -euo pipefail
+          plan=docs/RaceDay_API_Endpoint_Plan.md
+          status=0
+          while IFS= read -r section; do
+            if grep -qF "## $section" "$plan"; then
+              echo "ok       section: $section"
+            else
+              echo "MISSING  section: $section"
+              status=1
+            fi
+          done <<'SECTIONS'
+          Authentication
+          User Profile
+          Events
+          Categories
+          Event Enrolments
+          Results
+          SECTIONS
+
+          endpoints=$(grep -cE '^\| *(GET|POST|PUT|DELETE) ' "$plan" || true)
+          echo "found    $endpoints documented endpoints"
+          if [ "$endpoints" -lt 19 ]; then
+            echo "EXPECTED at least 19 endpoints"
+            status=1
+          fi
+          exit $status
+
+      - name: SQL script defines all six tables
+        run: |
+          set -euo pipefail
+          sql=docs/raceday_schema.sql
+          status=0
+          for t in Roles Users Events Categories Enrolments Results; do
+            if grep -qE "^CREATE TABLE dbo\.$t\b" "$sql"; then
+              echo "ok       table: $t"
+            else
+              echo "MISSING  table: $t"
+              status=1
+            fi
+          done
+
+          drops=$(grep -cE '^DROP TABLE IF EXISTS dbo\.' "$sql" || true)
+          seeds=$(grep -cE '^INSERT INTO dbo\.' "$sql" || true)
+          echo "found    $drops drop statements, $seeds seed inserts"
+          if [ "$drops" -lt 6 ] || [ "$seeds" -lt 6 ]; then
+            echo "EXPECTED 6 drops and 6 seed inserts"
+            status=1
+          fi
+          exit $status
