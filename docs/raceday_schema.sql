@@ -24,3 +24,33 @@ CREATE TABLE dbo.Users (
     CreatedAt         DATETIME      DEFAULT GETDATE() NOT NULL,
     CONSTRAINT FK_Users_Roles FOREIGN KEY (RoleID) REFERENCES dbo.Roles (RoleID)
 );
+
+-- 3. Events
+-- Created and owned by an Organiser. EventType is restricted to the three
+-- categories the brief lists: run, walk, cycle.
+CREATE TABLE dbo.Events (
+    EventID        INT            IDENTITY (1, 1) PRIMARY KEY,
+    OrganiserID    INT            NOT NULL,
+    EventName      VARCHAR (150)  NOT NULL,
+    Description    VARCHAR (1000) NULL,
+    EventDate      DATETIME       NOT NULL,
+    Location       VARCHAR (200)  NOT NULL,
+    DistanceKm     DECIMAL (6, 2) NOT NULL,
+    EventType      VARCHAR (20)   NOT NULL,
+    BannerImageUrl VARCHAR (255)  NULL,
+    CreatedAt      DATETIME       DEFAULT GETDATE() NOT NULL,
+    CONSTRAINT FK_Events_Users FOREIGN KEY (OrganiserID) REFERENCES dbo.Users (UserID),
+    CONSTRAINT CK_Events_EventType CHECK (EventType IN ('Run', 'Walk', 'Cycle'))
+);
+
+-- 4. Categories
+-- Age or distance categories, defined per event by its Organiser.
+CREATE TABLE dbo.Categories (
+    CategoryID   INT            IDENTITY (1, 1) PRIMARY KEY,
+    EventID      INT            NOT NULL,
+    CategoryName VARCHAR (100)  NOT NULL,
+    MinAge       INT            NULL,
+    MaxAge       INT            NULL,
+    DistanceKm   DECIMAL (6, 2) NULL,
+    CONSTRAINT FK_Categories_Events FOREIGN KEY (EventID) REFERENCES dbo.Events (EventID)
+);
