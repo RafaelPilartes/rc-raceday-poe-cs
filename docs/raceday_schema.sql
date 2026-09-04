@@ -1,7 +1,7 @@
 -- RaceDay database schema and seed data
 -- PROG6212 Part 1: System Planning and Database
 -- Target: SQL Server / Azure SQL Database, run through SSMS
--- Matches erd.png exactly: Roles, Users, Events, Categories, Enrolments, Results
+-- Matches RaceDay_ERD.png exactly: Roles, Users, Events, Categories, Enrolments, Results
 
 -- Tables are dropped in reverse dependency order so the script can be re-run
 -- cleanly against the same instance without manual cleanup first.
