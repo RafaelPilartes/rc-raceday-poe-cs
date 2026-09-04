@@ -1,5 +1,22 @@
 -- RaceDay database schema and seed data
 -- PROG6212 Part 1: System Planning and Database
+-- Target: SQL Server / Azure SQL Database, run through SSMS
+-- Matches erd.png exactly: Roles, Users, Events, Categories, Enrolments, Results
+
+-- Tables are dropped in reverse dependency order so the script can be re-run
+-- cleanly against the same instance without manual cleanup first.
+DROP TABLE IF EXISTS dbo.Results;
+
+DROP TABLE IF EXISTS dbo.Enrolments;
+
+DROP TABLE IF EXISTS dbo.Categories;
+
+DROP TABLE IF EXISTS dbo.Events;
+
+DROP TABLE IF EXISTS dbo.Users;
+
+DROP TABLE IF EXISTS dbo.Roles;
+
 -- 1. Roles
 -- Lookup table for the two account types in the system. Keeping this separate
 -- from Users, rather than a free-text column, is what enforces valid roles
@@ -53,4 +70,33 @@ CREATE TABLE dbo.Categories (
     MaxAge       INT            NULL,
     DistanceKm   DECIMAL (6, 2) NULL,
     CONSTRAINT FK_Categories_Events FOREIGN KEY (EventID) REFERENCES dbo.Events (EventID)
+);
+
+-- 5. Enrolments
+-- Links a Participant to one event under one category. The unique constraint
+-- stops the same participant enrolling twice in the same event.
+CREATE TABLE dbo.Enrolments (
+    EnrolmentID   INT          IDENTITY (1, 1) PRIMARY KEY,
+    ParticipantID INT          NOT NULL,
+    EventID       INT          NOT NULL,
+    CategoryID    INT          NOT NULL,
+    EnrolmentDate DATETIME     DEFAULT GETDATE() NOT NULL,
+    Status        VARCHAR (20) DEFAULT 'Confirmed' NOT NULL,
+    CONSTRAINT FK_Enrolments_Users FOREIGN KEY (ParticipantID) REFERENCES dbo.Users (UserID),
+    CONSTRAINT FK_Enrolments_Events FOREIGN KEY (EventID) REFERENCES dbo.Events (EventID),
+    CONSTRAINT FK_Enrolments_Categories FOREIGN KEY (CategoryID) REFERENCES dbo.Categories (CategoryID),
+    CONSTRAINT CK_Enrolments_Status CHECK (Status IN ('Confirmed', 'Pending', 'Cancelled')),
+    CONSTRAINT UQ_Enrolments_Participant_Event UNIQUE (ParticipantID, EventID)
+);
+
+-- 6. Results
+-- One result per enrolment, captured by the Organiser after the event.
+-- The unique constraint on EnrolmentID enforces that one-to-one relationship.
+CREATE TABLE dbo.Results (
+    ResultID          INT      IDENTITY (1, 1) PRIMARY KEY,
+    EnrolmentID       INT      NOT NULL UNIQUE,
+    FinishTime        TIME     NULL,
+    FinishingPosition INT      NULL,
+    CapturedAt        DATETIME NULL,
+    CONSTRAINT FK_Results_Enrolments FOREIGN KEY (EnrolmentID) REFERENCES dbo.Enrolments (EnrolmentID)
 );
