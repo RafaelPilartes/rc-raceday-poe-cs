@@ -34,7 +34,7 @@ The script has to run without errors on a clean instance before submission. Test
 
 A GitHub Actions workflow runs on every push and checks that Part 1 is complete: the `/docs` folder contains the ERD image, the endpoint plan, and the SQL script; the endpoint plan covers all six functional areas; and the SQL script defines all six tables with their seed data.
 
-`[Screenshot of the successful green build here once the workflow has run.]`
+![Successful Part 1 validation build](docs/ci-green.png)
 
 ## Video walkthrough
 
