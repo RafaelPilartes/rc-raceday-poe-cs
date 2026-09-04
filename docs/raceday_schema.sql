@@ -100,3 +100,44 @@ CREATE TABLE dbo.Results (
     CapturedAt        DATETIME NULL,
     CONSTRAINT FK_Results_Enrolments FOREIGN KEY (EnrolmentID) REFERENCES dbo.Enrolments (EnrolmentID)
 );
+
+-- ============================================================
+-- Seed data
+-- ============================================================
+INSERT INTO dbo.Roles (
+    RoleName
+)
+VALUES
+    ('Organiser'),
+    ('Participant');
+
+-- PasswordHash values below are placeholder strings only, shaped like a real
+-- hash so the column and its length make sense. Part 2 generates the real
+-- hashes through the API's registration endpoint, not through this script.
+INSERT INTO dbo.Users (
+    RoleID,
+    FullName,
+    Email,
+    PasswordHash,
+    ProfilePictureUrl
+)
+VALUES
+    (1, 'Thabo Nkosi', 'thabo.nkosi@raceday.co.za', 'AQAAAAIAAYagAAAAEJ4H2m9pQe7Zx1yV3sT6wL8bR4cN0dK5', NULL),
+    (1, 'Amanda van der Merwe', 'amanda.vdm@raceday.co.za', 'AQAAAAIAAYagAAAAEL6P3n0qRf8Ay2zW4tU7xM9cS5dO1eL6', NULL),
+    (2, 'Sipho Dlamini', 'sipho.dlamini@raceday.co.za', 'AQAAAAIAAYagAAAAEK7Q4o1rSg9Bz3aX5uV8yN0dT6eP2fM7', NULL),
+    (2, 'Lerato Mokoena', 'lerato.mokoena@raceday.co.za', 'AQAAAAIAAYagAAAAEM8R5p2sTh0Ca4bY6vW9zO1eU7fQ3gN8', NULL);
+
+INSERT INTO dbo.Events (
+    OrganiserID,
+    EventName,
+    Description,
+    EventDate,
+    Location,
+    DistanceKm,
+    EventType,
+    BannerImageUrl
+)
+VALUES
+    (1, 'Cape Town Coastal 10K', 'A flat, scenic 10km run along the Sea Point promenade.', '2026-06-15 07:00:00', 'Sea Point Promenade, Cape Town', 10.00, 'Run', NULL),
+    (1, 'Joburg City Cycle Challenge', 'Road cycling event through Sandton and surrounds, with 42km and 21km routes.', '2026-11-08 06:30:00', 'Sandton, Johannesburg', 42.00, 'Cycle', NULL),
+    (2, 'Durban Beachfront Walkathon', 'Family-friendly 5km walk along the Durban beachfront in support of local charities.', '2026-12-06 08:00:00', 'Durban Beachfront', 5.00, 'Walk', NULL);
