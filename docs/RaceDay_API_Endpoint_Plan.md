@@ -35,3 +35,11 @@ Part 1, Section B. Every non-public endpoint depends on an active server-side se
 | POST        | /api/events/{eventId}/categories | Adds an age or distance category to an event owned by the logged-in Organiser. | Organiser (owner)   | { categoryName, minAge, maxAge, distanceKm } | 201 Created with the new category id. 400 Bad Request. 403 Forbidden. |
 | PUT         | /api/categories/{id}             | Updates a category belonging to one of the Organiser's events.                 | Organiser (owner)   | { categoryName, minAge, maxAge, distanceKm } | 200 OK with the updated category. 403 Forbidden. 404 Not Found.       |
 | DELETE      | /api/categories/{id}             | Removes a category from one of the Organiser's events.                         | Organiser (owner)   | None                                         | 204 No Content. 403 Forbidden. 404 Not Found.                         |
+
+## Event Enrolments
+
+| HTTP Method | Route                            | Description                                                                    | Role Required     | Request Body   | Expected Response                                                                                                   |
+| ----------- | -------------------------------- | ------------------------------------------------------------------------------ | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
+| POST        | /api/events/{eventId}/enrolments | Enrols the logged-in Participant into the event under a chosen category.       | Participant       | { categoryId } | 201 Created with the new enrolment. 400 Bad Request. 403 Forbidden. 409 Conflict if already enrolled in that event. |
+| GET         | /api/enrolments/my               | Lists the logged-in Participant's own enrolments and their status.             | Participant       | None           | 200 OK with an array of enrolments.                                                                                 |
+| GET         | /api/events/{eventId}/enrolments | Lists every Participant enrolled in an event owned by the logged-in Organiser. | Organiser (owner) | None           | 200 OK with an array of enrolments. 403 Forbidden.                                                                  |
