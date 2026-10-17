@@ -181,10 +181,7 @@ test, so no SQL Server instance is needed to run them.
 `.github/workflows/part2-ci.yml` restores, builds in Release and runs `dotnet test` on every push
 and pull request.
 
-> **Still to do before submitting:** push these commits, wait for the workflow to finish, and save
-> the green build as `docs/part2-ci-green.png`, then replace this note with
-> `![Successful Part 2 build](docs/part2-ci-green.png)`. The workflow has not run yet because the
-> Part 2 commits are still local.
+![Successful Part 2 build and test run](docs/part2-ci-green.png)
 
 ### Where the implementation goes beyond the Part 1 plan
 
