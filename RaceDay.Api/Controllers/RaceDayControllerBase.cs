@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RaceDay.Api.Dtos;
 using RaceDay.Api.Security;
 
 namespace RaceDay.Api.Controllers;
@@ -14,4 +15,17 @@ public abstract class RaceDayControllerBase : ControllerBase
         HttpContext.Session.GetUserId()
         ?? throw new InvalidOperationException(
             "No user id in session. The action is missing the SessionAuthorize filter.");
+
+    /// <summary>
+    /// 403 with a readable reason. ControllerBase.Forbid() leans on the
+    /// authentication stack and returns an empty body, which is no help to
+    /// anyone testing through Swagger.
+    /// </summary>
+    protected ObjectResult Forbidden(string message)
+    {
+        return new ObjectResult(new MessageResponse(message))
+        {
+            StatusCode = StatusCodes.Status403Forbidden
+        };
+    }
 }
