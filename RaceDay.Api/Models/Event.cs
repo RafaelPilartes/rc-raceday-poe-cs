@@ -29,6 +29,8 @@ public class Event
     public User Organiser { get; set; } = null!;
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();
+
+    public ICollection<Enrolment> Enrolments { get; set; } = new List<Enrolment>();
 }
 
 public static class EventTypes
