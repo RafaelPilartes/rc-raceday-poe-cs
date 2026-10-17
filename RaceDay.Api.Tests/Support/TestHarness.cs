@@ -116,6 +116,25 @@ internal static class TestHarness
         return enrolment;
     }
 
+    public static Result AddResult(
+        this RaceDayDbContext db,
+        int enrolmentId,
+        string finishTime = "00:52:18",
+        int finishingPosition = 47)
+    {
+        var result = new Result
+        {
+            EnrolmentId = enrolmentId,
+            FinishTime = TimeSpan.Parse(finishTime),
+            FinishingPosition = finishingPosition,
+            CapturedAt = DateTime.Now
+        };
+
+        db.Results.Add(result);
+        db.SaveChanges();
+        return result;
+    }
+
     /// <summary>Hands the controller a session that is logged in as this user.</summary>
     public static TController SignedInAs<TController>(this TController controller, User user)
         where TController : ControllerBase

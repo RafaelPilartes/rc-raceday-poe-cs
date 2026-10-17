@@ -130,14 +130,16 @@ public class ResultsController : RaceDayControllerBase
 
         // The time is formatted after the query because SQL Server has no
         // translation for TimeSpan.ToString(format).
-        var results = rows.Select(row => new MyResultResponse(
-            row.ResultId,
-            row.EventId,
-            row.EventName,
-            row.EventDate,
-            row.CategoryName,
-            row.FinishTime?.ToString(TimeFormat),
-            row.FinishingPosition));
+        var results = rows
+            .Select(row => new MyResultResponse(
+                row.ResultId,
+                row.EventId,
+                row.EventName,
+                row.EventDate,
+                row.CategoryName,
+                row.FinishTime?.ToString(TimeFormat),
+                row.FinishingPosition))
+            .ToList();
 
         return Ok(results);
     }
