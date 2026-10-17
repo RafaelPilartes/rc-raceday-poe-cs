@@ -121,4 +121,51 @@ public class EnrolmentsController : RaceDayControllerBase
 
         return Ok(enrolments);
     }
+
+    /// <summary>Lists everyone entered in an event the logged-in Organiser owns.</summary>
+    /// <remarks>
+    /// This is the start list for the event: who entered, under which
+    /// category, and when. Only the Organiser who created the event can see it.
+    /// </remarks>
+    /// <param name="eventId">The event id.</param>
+    /// <response code="200">The entries for that event, grouped by category.</response>
+    /// <response code="401">No active session.</response>
+    /// <response code="403">The caller is a Participant, or an Organiser who does not own this event.</response>
+    /// <response code="404">No event with that id.</response>
+    [HttpGet("api/events/{eventId:int}/enrolments")]
+    [SessionAuthorize(RoleNames.Organiser)]
+    [ProducesResponseType(typeof(IEnumerable<EventEnrolmentResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<IEnumerable<EventEnrolmentResponse>>> GetEnrolmentsForEvent(int eventId)
+    {
+        var raceEvent = await db.Events.SingleOrDefaultAsync(e => e.EventId == eventId);
+        if (raceEvent is null)
+        {
+            return NotFound(new MessageResponse($"No event with id {eventId}."));
+        }
+
+        if (raceEvent.OrganiserId != CurrentUserId)
+        {
+            return Forbidden("You can only see the entries for events you created.");
+        }
+
+        var enrolments = await db.Enrolments
+            .Where(e => e.EventId == eventId)
+            .OrderBy(e => e.Category.CategoryName)
+            .ThenBy(e => e.Participant.FullName)
+            .Select(e => new EventEnrolmentResponse(
+                e.EnrolmentId,
+                e.ParticipantId,
+                e.Participant.FullName,
+                e.Participant.Email,
+                e.CategoryId,
+                e.Category.CategoryName,
+                e.EnrolmentDate,
+                e.Status))
+            .ToListAsync();
+
+        return Ok(enrolments);
+    }
 }

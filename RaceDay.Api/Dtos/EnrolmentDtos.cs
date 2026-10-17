@@ -22,3 +22,14 @@ public record MyEnrolmentResponse(
     string CategoryName,
     DateTime EnrolmentDate,
     string Status);
+
+/// <summary>One entry in an Organiser's start list for an event.</summary>
+public record EventEnrolmentResponse(
+    int EnrolmentId,
+    int ParticipantId,
+    string ParticipantName,
+    string ParticipantEmail,
+    int CategoryId,
+    string CategoryName,
+    DateTime EnrolmentDate,
+    string Status);
