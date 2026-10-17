@@ -12,12 +12,17 @@ namespace RaceDay.Api.Security;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 public sealed class SessionAuthorizeAttribute : Attribute, IAuthorizationFilter
 {
-    private readonly string[] allowedRoles;
-
     public SessionAuthorizeAttribute(params string[] allowedRoles)
     {
-        this.allowedRoles = allowedRoles;
+        AllowedRoles = allowedRoles;
     }
+
+    /// <summary>
+    /// The roles this endpoint accepts. Empty means any logged-in user. Public
+    /// so the tests can confirm each endpoint asks for the role the Part 1 plan
+    /// says it should.
+    /// </summary>
+    public IReadOnlyList<string> AllowedRoles { get; }
 
     public void OnAuthorization(AuthorizationFilterContext context)
     {
@@ -30,16 +35,16 @@ public sealed class SessionAuthorizeAttribute : Attribute, IAuthorizationFilter
             return;
         }
 
-        if (allowedRoles.Length == 0)
+        if (AllowedRoles.Count == 0)
         {
             return;
         }
 
         var roleName = session.GetRoleName();
-        if (roleName is null || !allowedRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
+        if (roleName is null || !AllowedRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
         {
             context.Result = new ObjectResult(new MessageResponse(
-                $"This endpoint is restricted to the {string.Join(" and ", allowedRoles)} role."))
+                $"This endpoint is restricted to the {string.Join(" and ", AllowedRoles)} role."))
             {
                 StatusCode = StatusCodes.Status403Forbidden
             };
