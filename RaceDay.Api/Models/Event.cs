@@ -27,6 +27,8 @@ public class Event
     public DateTime CreatedAt { get; set; }
 
     public User Organiser { get; set; } = null!;
+
+    public ICollection<Category> Categories { get; set; } = new List<Category>();
 }
 
 public static class EventTypes
