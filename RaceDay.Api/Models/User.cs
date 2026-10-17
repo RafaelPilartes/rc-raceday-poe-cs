@@ -20,4 +20,6 @@ public class User
     public DateTime CreatedAt { get; set; }
 
     public Role Role { get; set; } = null!;
+
+    public ICollection<Event> OrganisedEvents { get; set; } = new List<Event>();
 }
