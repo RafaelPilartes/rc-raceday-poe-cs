@@ -105,4 +105,22 @@ public class AuthController : ControllerBase
 
         return Ok(new LoggedInUserResponse(user.UserId, user.FullName, user.Role.RoleName));
     }
+
+    /// <summary>Ends the caller's session.</summary>
+    /// <remarks>
+    /// Clears the user id and role from the server-side session, which leaves
+    /// the cookie in place but useless. The caller is treated as anonymous
+    /// again from the next request onwards.
+    /// </remarks>
+    /// <response code="200">Session ended.</response>
+    /// <response code="401">There was no active session to end.</response>
+    [HttpPost("logout")]
+    [SessionAuthorize]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    public IActionResult Logout()
+    {
+        HttpContext.Session.Clear();
+        return Ok(new MessageResponse("You have been logged out."));
+    }
 }
