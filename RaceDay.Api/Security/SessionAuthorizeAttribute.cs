@@ -39,7 +39,7 @@ public sealed class SessionAuthorizeAttribute : Attribute, IAuthorizationFilter
         if (roleName is null || !allowedRoles.Contains(roleName, StringComparer.OrdinalIgnoreCase))
         {
             context.Result = new ObjectResult(new MessageResponse(
-                $"Only a {string.Join(" or ", allowedRoles)} can use this endpoint."))
+                $"This endpoint is restricted to the {string.Join(" and ", allowedRoles)} role."))
             {
                 StatusCode = StatusCodes.Status403Forbidden
             };
