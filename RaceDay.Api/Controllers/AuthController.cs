@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RaceDay.Api.Data;
 using RaceDay.Api.Dtos;
 using RaceDay.Api.Models;
+using RaceDay.Api.Security;
 
 namespace RaceDay.Api.Controllers;
 
@@ -70,5 +71,38 @@ public class AuthController : ControllerBase
 
         var response = new RegisteredUserResponse(user.UserId, user.FullName, user.Email, role.RoleName);
         return StatusCode(StatusCodes.Status201Created, response);
+    }
+
+    /// <summary>Checks the credentials and starts a session for the user.</summary>
+    /// <remarks>
+    /// On success the user id and role are written to the server-side session
+    /// and the caller gets back the RaceDay.Session cookie. Every protected
+    /// endpoint reads the role from that session, so the cookie has to be sent
+    /// with the requests that follow. Swagger does this automatically.
+    /// </remarks>
+    /// <param name="request">Email address and password.</param>
+    /// <response code="200">Logged in. Returns the user id, name and role.</response>
+    /// <response code="400">Email or password was left out.</response>
+    /// <response code="401">No account with that email, or the password does not match.</response>
+    [HttpPost("login")]
+    [ProducesResponseType(typeof(LoggedInUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<LoggedInUserResponse>> Login(LoginRequest request)
+    {
+        var email = request.Email.Trim().ToLowerInvariant();
+        var user = await db.Users.Include(u => u.Role).SingleOrDefaultAsync(u => u.Email == email);
+
+        // Same message either way, so the response cannot be used to work out
+        // which email addresses exist.
+        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            return Unauthorized(new MessageResponse("Email address or password is incorrect."));
+        }
+
+        HttpContext.Session.Clear();
+        HttpContext.Session.StartUserSession(user.UserId, user.Role.RoleName);
+
+        return Ok(new LoggedInUserResponse(user.UserId, user.FullName, user.Role.RoleName));
     }
 }
