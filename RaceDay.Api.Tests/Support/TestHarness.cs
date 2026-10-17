@@ -133,11 +133,11 @@ internal static class TestHarness
         };
     }
 
-    public static TBody BodyOf<TBody, TValue>(ActionResult<TValue> actionResult)
-    {
-        return BodyOf<TBody>(actionResult.Result);
-    }
-
+    /// <summary>
+    /// The response body, checked to be the type the test expects. Callers pass
+    /// actionResult.Result rather than the ActionResult itself, because an
+    /// overload taking both cannot be resolved without ambiguity.
+    /// </summary>
     public static TBody BodyOf<TBody>(IActionResult? result)
     {
         var objectResult = Assert.IsAssignableFrom<ObjectResult>(result);
