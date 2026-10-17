@@ -1,0 +1,31 @@
+name: Part 2 build and test
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build the API and run the unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore RaceDay.sln
+
+      - name: Build
+        run: dotnet build RaceDay.sln --configuration Release --no-restore
+
+      # The tests use EF Core's in-memory provider, so the runner needs no
+      # SQL Server instance of its own.
+      - name: Unit tests
+        run: dotnet test RaceDay.sln --configuration Release --no-build --logger "console;verbosity=normal"
