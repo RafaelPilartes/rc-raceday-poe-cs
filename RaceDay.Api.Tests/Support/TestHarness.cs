@@ -95,6 +95,27 @@ internal static class TestHarness
         return category;
     }
 
+    public static Enrolment AddEnrolment(
+        this RaceDayDbContext db,
+        int participantId,
+        int eventId,
+        int categoryId,
+        string status = EnrolmentStatuses.Confirmed)
+    {
+        var enrolment = new Enrolment
+        {
+            ParticipantId = participantId,
+            EventId = eventId,
+            CategoryId = categoryId,
+            EnrolmentDate = DateTime.Now,
+            Status = status
+        };
+
+        db.Enrolments.Add(enrolment);
+        db.SaveChanges();
+        return enrolment;
+    }
+
     /// <summary>Hands the controller a session that is logged in as this user.</summary>
     public static TController SignedInAs<TController>(this TController controller, User user)
         where TController : ControllerBase
