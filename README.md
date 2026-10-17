@@ -93,7 +93,15 @@ create the event still gets `403` on it, which is what the "Owner" column in the
 
 - .NET 8 SDK
 - A SQL Server instance. SQL Server Express, LocalDB, an Azure SQL Database or a SQL Server
-  container all work; the API was developed against SQL Server 2022.
+  container all work; the API was developed against SQL Server 2022 in a container started with:
+
+  ```bash
+  docker run -d --name raceday-sql \
+    -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=RaceDay#Local2026" -e "MSSQL_PID=Developer" \
+    -p 1433:1433 mcr.microsoft.com/mssql/server:2022-latest
+  ```
+
+  That password is the one in `appsettings.json`, so the two line up out of the box.
 - The EF Core tools, if you want to run migrations from the command line:
   `dotnet tool install --global dotnet-ef --version 8.*`
 

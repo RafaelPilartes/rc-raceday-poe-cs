@@ -3,6 +3,7 @@ bin/
 obj/
 [Dd]ebug/
 [Rr]elease/
+TestResults/
 
 # User-specific and IDE files
 .vs/
