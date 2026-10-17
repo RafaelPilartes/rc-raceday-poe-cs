@@ -1,4 +1,6 @@
+using System.Reflection;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using RaceDay.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,15 +21,32 @@ builder.Services.AddSession(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "RaceDay API",
+        Version = "v1",
+        Description =
+            "RESTful API for the RaceDay event management system, built to the endpoint plan in "
+            + "docs/RaceDay_API_Endpoint_Plan.md.\n\n"
+            + "Access is driven by a server-side session. Register through "
+            + "POST /api/auth/register, then POST /api/auth/login: the RaceDay.Session cookie "
+            + "that comes back is sent automatically by this page, so every endpoint below can be "
+            + "tried straight from here. Endpoints marked Organiser or Participant answer 403 for "
+            + "the other role, and 401 when there is no session at all."
+    });
+
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFile));
+});
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// Swagger stays on in every environment: for Part 2 it is the way the API is
+// demonstrated and marked, not just a development convenience.
+app.UseSwagger();
+app.UseSwaggerUI(options => options.DocumentTitle = "RaceDay API");
 
 app.UseHttpsRedirection();
 app.UseSession();
