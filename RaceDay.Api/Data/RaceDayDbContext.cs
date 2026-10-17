@@ -35,6 +35,12 @@ public class RaceDayDbContext : DbContext
             role.Property(r => r.RoleId).HasColumnName("RoleID");
             role.Property(r => r.RoleName).HasMaxLength(20).IsUnicode(false).IsRequired();
             role.HasIndex(r => r.RoleName).IsUnique();
+
+            // The two roles are fixed by the brief, so they ship with the
+            // migration rather than being inserted by hand after deployment.
+            role.HasData(
+                new Role { RoleId = 1, RoleName = RoleNames.Organiser },
+                new Role { RoleId = 2, RoleName = RoleNames.Participant });
         });
 
         modelBuilder.Entity<User>(user =>
