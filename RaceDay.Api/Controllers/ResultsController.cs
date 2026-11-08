@@ -87,19 +87,60 @@ public class ResultsController : RaceDayControllerBase
         db.Results.Add(result);
         await db.SaveChangesAsync();
 
-        var response = new ResultResponse(
-            result.ResultId,
-            enrolment.EnrolmentId,
-            enrolment.EventId,
-            enrolment.Event.EventName,
-            enrolment.ParticipantId,
-            enrolment.Participant.FullName,
-            enrolment.Category.CategoryName,
-            result.FinishTime?.ToString(TimeFormat),
-            result.FinishingPosition,
-            result.CapturedAt);
+        return CreatedAtAction(nameof(GetMyResults), null, Describe(result, enrolment));
+    }
 
-        return CreatedAtAction(nameof(GetMyResults), null, response);
+    /// <summary>Corrects a result that has already been captured.</summary>
+    /// <remarks>
+    /// Only the Organiser who owns the event may change it, and the capture
+    /// timestamp moves to the moment of the correction.
+    /// </remarks>
+    /// <param name="enrolmentId">The entry whose result is being corrected.</param>
+    /// <param name="request">The corrected finish time and position.</param>
+    /// <response code="200">The result after the correction.</response>
+    /// <response code="400">The time is badly formatted.</response>
+    /// <response code="401">No active session.</response>
+    /// <response code="403">The caller is a Participant, or an Organiser who does not own this event.</response>
+    /// <response code="404">No entry with that id, or it has no result to correct yet.</response>
+    [HttpPut("api/enrolments/{enrolmentId:int}/result")]
+    [SessionAuthorize(RoleNames.Organiser)]
+    [ProducesResponseType(typeof(ResultResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ResultResponse>> UpdateResult(int enrolmentId, CaptureResultRequest request)
+    {
+        var enrolment = await db.Enrolments
+            .Include(e => e.Event)
+            .Include(e => e.Participant)
+            .Include(e => e.Category)
+            .SingleOrDefaultAsync(e => e.EnrolmentId == enrolmentId);
+
+        if (enrolment is null)
+        {
+            return NotFound(new MessageResponse($"No enrolment with id {enrolmentId}."));
+        }
+
+        if (enrolment.Event.OrganiserId != CurrentUserId)
+        {
+            return Forbidden("You can only change results for events you created.");
+        }
+
+        var result = await db.Results.SingleOrDefaultAsync(r => r.EnrolmentId == enrolmentId);
+        if (result is null)
+        {
+            return NotFound(new MessageResponse(
+                "This enrolment has no result yet. Capture one before correcting it."));
+        }
+
+        result.FinishTime = TimeSpan.Parse(request.FinishTime);
+        result.FinishingPosition = request.FinishingPosition;
+        result.CapturedAt = DateTime.Now;
+
+        await db.SaveChangesAsync();
+
+        return Ok(Describe(result, enrolment));
     }
 
     /// <summary>Lists the logged-in Participant's own results.</summary>
@@ -124,7 +165,8 @@ public class ResultsController : RaceDayControllerBase
                 r.Enrolment.Event.EventDate,
                 r.Enrolment.Category.CategoryName,
                 r.FinishTime,
-                r.FinishingPosition
+                r.FinishingPosition,
+                TotalFinishers = db.Results.Count(other => other.Enrolment.EventId == r.Enrolment.EventId)
             })
             .ToListAsync();
 
@@ -138,9 +180,25 @@ public class ResultsController : RaceDayControllerBase
                 row.EventDate,
                 row.CategoryName,
                 row.FinishTime?.ToString(TimeFormat),
-                row.FinishingPosition))
+                row.FinishingPosition,
+                row.TotalFinishers))
             .ToList();
 
         return Ok(results);
+    }
+
+    private static ResultResponse Describe(Result result, Enrolment enrolment)
+    {
+        return new ResultResponse(
+            result.ResultId,
+            enrolment.EnrolmentId,
+            enrolment.EventId,
+            enrolment.Event.EventName,
+            enrolment.ParticipantId,
+            enrolment.Participant.FullName,
+            enrolment.Category.CategoryName,
+            result.FinishTime?.ToString(TimeFormat),
+            result.FinishingPosition,
+            result.CapturedAt);
     }
 }

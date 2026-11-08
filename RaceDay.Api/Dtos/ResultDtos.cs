@@ -40,4 +40,5 @@ public record MyResultResponse(
     DateTime EventDate,
     string CategoryName,
     string? FinishTime,
-    int? FinishingPosition);
+    int? FinishingPosition,
+    int TotalFinishers);
