@@ -2,7 +2,7 @@
 
 RaceDay is a web-based event management platform built for the South African road running, walking, and cycling community. It replaces the paper registration sheets and disconnected spreadsheets that most local road events still rely on. Event Organisers use it to publish events, set up age or distance categories, and capture results. Participants use it to browse events, enter the category of their choice, and track their own race history over time.
 
-This repository covers the three parts of the PROG6212 Portfolio of Evidence. Part 1 is the planning stage: an ERD, a full API endpoint plan, and a SQL script that builds and seeds the database. Part 2 is the RESTful API built against that plan, in `RaceDay.Api`, with its unit tests in `RaceDay.Api.Tests`. Part 3 will add the MVC front end on top of the same API.
+This repository covers the three parts of the PROG6212 Portfolio of Evidence. Part 1 is the planning stage: an ERD, a full API endpoint plan, and a SQL script that builds and seeds the database. Part 2 is the RESTful API built against that plan, in `RaceDay.Api`, with its unit tests in `RaceDay.Api.Tests`. Part 3 is the MVC front end in `RaceDay.Web`, which consumes that API for every data operation, adds Azure Blob Storage for images, and runs in a Docker container.
 
 ## Roles
 
@@ -28,7 +28,14 @@ Both roles are stored in the same `Users` table and distinguished by a `RoleID` 
   Dtos/                        Request and response shapes
   Security/                    Session helpers and the SessionAuthorize filter
 /RaceDay.Api.Tests             Part 2: xUnit tests
-RaceDay.sln                    Solution tying the two projects together
+/RaceDay.Web                   Part 3: the ASP.NET Core 8 MVC front end
+  Controllers/                 One controller per screen area
+  Views/                       Razor views, Bootstrap 5
+  Models/                      View models and the shapes the API returns
+  Services/                    ApiClient, the only way this app reaches the API
+  Security/                    Session helpers and the role filter
+  Dockerfile                   Multi-stage build for the container
+RaceDay.sln                    Solution tying the three projects together
 ```
 
 ## Part 1 — planning and database
@@ -198,6 +205,111 @@ adds status codes for cases the plan did not spell out:
 | `PUT /api/categories/{id}` | `400 Bad Request` | `MinAge` is greater than `MaxAge` |
 | `GET /api/events` | `400 Bad Request` | The `eventType` filter is not Run, Walk or Cycle |
 
+## Part 3 — the MVC web application
+
+An ASP.NET Core 8 MVC app that talks to the Part 2 API for everything. It holds no
+`DbContext`, no connection string and no business rules of its own: `RaceDay.Web/Services/ApiClient.cs`
+is the only door out, and every page goes through it.
+
+### How the session reaches the API
+
+The API authenticates with a server-side session cookie. The MVC app calls the API from the server,
+so that cookie never reaches the browser and would be lost between requests. On sign-in the
+`ApiClient` reads the API's `Set-Cookie`, keeps the value in the MVC app's own session, and attaches
+it to every later call. The user id, role and name are kept in the MVC session as well, so the
+navigation and the role filter do not have to ask the API on each page.
+
+That gives two session cookies, which is intentional: `RaceDay.Session` belongs to the API and never
+leaves the server, and `RaceDay.Web.Session` is the one the browser holds.
+
+`SessionAuthorize` in `RaceDay.Web/Security` is the same idea as the API filter: no session sends you
+to the sign-in page remembering where you were going, and the wrong role sends you to an access
+denied page. Typing an Organiser URL as a Participant, or the other way round, is refused.
+
+### What each role sees
+
+**Organiser** — a dashboard with events created, total enrolments and the next race day; publishing,
+editing and deleting events with a banner upload; categories per event; the entry list for an event;
+and a results page where finish times and positions are typed in and corrected.
+
+**Participant** — a race listing filtered by date, location, type and whether the race is still to
+come; a race page with the banner and categories, and a button to enter under a chosen category; the
+entries they hold with status; results written as "2nd out of 2 finishers"; and a profile with a
+photo.
+
+### Images and Azure Blob Storage
+
+Both uploads go through the API, which is the only thing holding Azure credentials. The MVC app posts
+the file to `POST /api/events/{id}/banner` or `POST /api/profile/picture`, the API stores it in the
+`raceday-images` container and saves the returned URL on the row, and the page uses that URL straight
+in an `img` tag. JPEG, PNG and WebP up to 5 MB are accepted.
+
+The container is created on first upload with blob-level public read, which is what lets the browser
+load the image directly.
+
+### Running it
+
+The API has to be running before the MVC app is of any use.
+
+**1. The API.** Put the storage connection string in user secrets, never in `appsettings.json`:
+
+```bash
+dotnet user-secrets set "AzureStorage:ConnectionString" "<your storage connection string>" --project RaceDay.Api
+dotnet ef database update --project RaceDay.Api
+dotnet run --project RaceDay.Api
+```
+
+**2. The MVC app.**
+
+```bash
+dotnet run --project RaceDay.Web
+```
+
+It opens on `https://localhost:7095` and reads the API address from `ApiBaseUrl` in
+`RaceDay.Web/appsettings.json`, which points at `http://localhost:5142/` by default.
+
+### Running the MVC app in Docker
+
+Only the MVC app is containerised. The API stays on the host, because it signs in to Azure SQL with
+`Authentication=Active Directory Default`, which uses the developer's own Azure login and is not
+available inside a container.
+
+Start the API bound to all interfaces so the container can reach it, then build and run:
+
+```bash
+dotnet run --project RaceDay.Api --urls http://0.0.0.0:5142
+
+docker build -f RaceDay.Web/Dockerfile -t raceday-web .
+
+docker run -d --name raceday-web -p 8090:8080 \
+  -e ApiBaseUrl=http://host.docker.internal:5142/ \
+  raceday-web
+```
+
+The app is then on `http://localhost:8090`. Port 8090 is only the host side; change it if it is
+taken. HTTP is used between the container and the API on purpose, so a development certificate does
+not have to be trusted inside the image.
+
+### Continuous integration
+
+`.github/workflows/build-and-test.yml` restores, builds all three projects in Release, runs the unit
+tests and builds the container image on every push.
+
+> **Still to do before submitting:** replace this note with
+> `![Successful build](docs/part3-ci-green.png)` once the workflow has run on these commits.
+
+### Deliberate decisions
+
+| Decision | Why |
+| --- | --- |
+| No new database columns | `Events.BannerImageUrl` and `Users.ProfilePictureUrl` were already in the Part 1 ERD and schema, so the uploads fill columns that existed. `raceday_schema.sql` is unchanged. |
+| Four new endpoints | Two uploads, the Organiser's own event list with enrolment counts, and a correction endpoint for results. All are in `docs/RaceDay_API_Endpoint_Plan.md`. |
+| Two widened responses | The event list gained an `upcomingOnly` filter; a Participant's results gained the finisher count behind "2nd out of 2"; the entry list carries the captured result so the Organiser results page needs one call. |
+| `PUT` on a result | Capture answers 409 the second time, so without it a mistyped time could never be fixed. |
+| Hidden image URL on edit forms | The API replaces the image URL with whatever the body carries, so the edit forms send the current one back and saving other details does not clear the picture. |
+| App pinned to `en-GB` | An HTML number input always posts `42.50`, and the host's culture was rejecting it. `en-GB` keeps decimals and dates the same on any machine and inside the container. |
+| Only the MVC app in Docker | Entra ID authentication to Azure SQL does not work inside a container. |
+
 ## Video walkthrough
 
 > **Still to do before submitting:** record both walkthroughs and replace the two lines below with
@@ -208,6 +320,8 @@ adds status codes for cases the plan did not spell out:
   *Not yet recorded.*
 - **Part 2** — the running API in Swagger, the code structure, how session authentication and
   role-based access work, and the unit tests passing. *Not yet recorded.*
+- **Part 3** — the MVC app for both roles, the banner and profile picture uploads reaching Azure,
+  role-based access being refused, and the app running in Docker. *Not yet recorded.*
 
 ## AI tools disclosure
 
