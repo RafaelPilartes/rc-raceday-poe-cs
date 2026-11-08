@@ -15,7 +15,7 @@ public class ProfileTests
     {
         using var db = TestHarness.NewDatabase();
         var user = db.AddUser(roleName, "sipho.dlamini@raceday.co.za", "Sipho Dlamini");
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
 
         var response = await controller.GetMyProfile();
 
@@ -32,7 +32,7 @@ public class ProfileTests
     {
         using var db = TestHarness.NewDatabase();
         var user = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za");
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
 
         var response = await controller.GetMyProfile();
 
@@ -47,7 +47,7 @@ public class ProfileTests
     {
         using var db = TestHarness.NewDatabase();
         var user = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za", "Sipho Dlamini");
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
 
         var response = await controller.UpdateMyProfile(new UpdateProfileRequest
         {
@@ -69,7 +69,7 @@ public class ProfileTests
         var user = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za");
         user.ProfilePictureUrl = "https://raceday.co.za/avatars/old.jpg";
         db.SaveChanges();
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
 
         await controller.UpdateMyProfile(new UpdateProfileRequest
         {
@@ -85,7 +85,7 @@ public class ProfileTests
     {
         using var db = TestHarness.NewDatabase();
         var user = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za");
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
 
         await controller.UpdateMyProfile(new UpdateProfileRequest { FullName = "Renamed" });
 
@@ -99,7 +99,7 @@ public class ProfileTests
     {
         using var db = TestHarness.NewDatabase();
         var user = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za");
-        var controller = new ProfileController(db).SignedInAs(user);
+        var controller = new ProfileController(db, new FakeBlobStorage()).SignedInAs(user);
         db.Users.Remove(user);
         db.SaveChanges();
 
