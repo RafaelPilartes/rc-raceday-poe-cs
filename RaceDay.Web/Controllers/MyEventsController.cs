@@ -6,7 +6,7 @@ using RaceDay.Web.Services;
 namespace RaceDay.Web.Controllers;
 
 [SessionAuthorize(RoleNames.Organiser)]
-public class MyEventsController : Controller
+public class MyEventsController : RaceDayController
 {
     private readonly ApiClient api;
 
@@ -75,6 +75,12 @@ public class MyEventsController : Controller
             return RedirectToAction(nameof(Index));
         }
 
+        if (result.Value.OrganiserId != CurrentUserId)
+        {
+            TempData["Error"] = "That event belongs to another organiser.";
+            return RedirectToAction("Index", "MyEvents");
+        }
+
         var raceEvent = result.Value;
         return View(new EventFormViewModel
         {
@@ -128,6 +134,12 @@ public class MyEventsController : Controller
         {
             TempData["Error"] = result.ErrorMessage;
             return RedirectToAction(nameof(Index));
+        }
+
+        if (result.Value.OrganiserId != CurrentUserId)
+        {
+            TempData["Error"] = "That event belongs to another organiser.";
+            return RedirectToAction("Index", "MyEvents");
         }
 
         return View(result.Value);

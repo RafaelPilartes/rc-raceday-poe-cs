@@ -6,7 +6,7 @@ using RaceDay.Web.Services;
 namespace RaceDay.Web.Controllers;
 
 [SessionAuthorize(RoleNames.Organiser)]
-public class EventCategoriesController : Controller
+public class EventCategoriesController : RaceDayController
 {
     private readonly ApiClient api;
 
@@ -124,6 +124,12 @@ public class EventCategoriesController : Controller
         if (!raceEvent.Succeeded || raceEvent.Value is null)
         {
             TempData["Error"] = raceEvent.ErrorMessage;
+            return null;
+        }
+
+        if (raceEvent.Value.OrganiserId != CurrentUserId)
+        {
+            TempData["Error"] = "That event belongs to another organiser.";
             return null;
         }
 

@@ -40,6 +40,9 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Home/Error");
 }
 
+// A missing page gets the RaceDay shell instead of a blank browser 404.
+app.UseStatusCodePagesWithReExecute("/Home/PageNotFound");
+
 app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
