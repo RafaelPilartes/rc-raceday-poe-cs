@@ -48,7 +48,7 @@
                 @if (signedInName is not null)
                 {
                     <div class="d-flex align-items-center gap-3 ms-auto">
-                        <span class="navbar-text">@signedInName (@signedInRole)</span>
+                        <a class="nav-link" asp-controller="Profile" asp-action="Index">@signedInName (@signedInRole)</a>
                         <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
                             <button type="submit" class="btn btn-sm btn-outline-light">Sign out</button>
                         </form>
