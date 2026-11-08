@@ -1,0 +1,41 @@
+@model List<MyResult>
+@{
+    ViewData["Title"] = "My results";
+}
+
+<h1 class="h3 page-heading">My results</h1>
+
+@if (Model.Count == 0)
+{
+    <div class="card p-4 text-center text-muted">
+        No results yet. They appear here once the organiser publishes them after a race.
+    </div>
+}
+else
+{
+    <div class="card">
+        <table class="table mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th>Race</th>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Finish time</th>
+                    <th>Placing</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var result in Model)
+                {
+                    <tr>
+                        <td class="fw-semibold">@result.EventName</td>
+                        <td>@result.EventDate.ToString("d MMM yyyy")</td>
+                        <td>@result.CategoryName</td>
+                        <td class="fw-bold">@(result.FinishTime ?? "—")</td>
+                        <td>@result.Placing</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
