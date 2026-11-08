@@ -1,4 +1,12 @@
+using System.Globalization;
 using RaceDay.Web.Services;
+
+// One culture everywhere, including inside the container, so dates and
+// distances do not follow the host machine. en-GB rather than en-ZA because
+// en-ZA writes decimals with a comma, which an HTML number input never sends.
+var displayCulture = new CultureInfo("en-GB");
+CultureInfo.DefaultThreadCurrentCulture = displayCulture;
+CultureInfo.DefaultThreadCurrentUICulture = displayCulture;
 
 var builder = WebApplication.CreateBuilder(args);
 
