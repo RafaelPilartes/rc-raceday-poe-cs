@@ -18,6 +18,15 @@
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Race<span>Day</span></a>
 
+                @if (signedInRole == RoleNames.Organiser)
+                {
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="MyEvents" asp-action="Index">My events</a>
+                        </li>
+                    </ul>
+                }
+
                 @if (signedInName is not null)
                 {
                     <div class="d-flex align-items-center gap-3 ms-auto">
@@ -39,6 +48,15 @@
 
     <div class="container">
         <main role="main" class="pb-3">
+            @if (TempData["Message"] is string successMessage)
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+            @if (TempData["Error"] is string errorMessage)
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+
             @RenderBody()
         </main>
     </div>

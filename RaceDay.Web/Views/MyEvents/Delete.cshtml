@@ -1,0 +1,20 @@
+@model EventDetail
+@{
+    ViewData["Title"] = "Delete event";
+}
+
+<h1 class="h3 page-heading">Delete this event?</h1>
+
+<div class="card p-4" style="max-width: 540px;">
+    <p class="mb-1 fw-semibold">@Model.EventName</p>
+    <p class="text-muted mb-3">
+        @Model.EventDate.ToString("d MMM yyyy HH:mm") · @Model.Location · @Model.DistanceKm km
+    </p>
+    <p>Its categories go with it. This cannot be undone.</p>
+
+    <form asp-action="Delete" method="post">
+        <input type="hidden" name="id" value="@Model.EventId" />
+        <button type="submit" class="btn btn-danger">Yes, delete it</button>
+        <a asp-action="Index" class="btn btn-link">Keep the event</a>
+    </form>
+</div>
