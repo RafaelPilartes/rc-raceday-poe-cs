@@ -1,0 +1,13 @@
+@model string
+
+@{
+    var badgeClass = Model switch
+    {
+        "Confirmed" => "status-badge status-confirmed",
+        "Pending" => "status-badge status-pending",
+        "Cancelled" => "status-badge status-cancelled",
+        _ => "status-badge"
+    };
+}
+
+<span class="@badgeClass">@Model</span>

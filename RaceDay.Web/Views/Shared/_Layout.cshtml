@@ -14,9 +14,9 @@
     }
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-dark mb-4">
+        <nav class="navbar navbar-expand-sm navbar-dark navbar-raceday mb-4">
             <div class="container">
-                <a class="navbar-brand" asp-controller="Home" asp-action="Index">RaceDay</a>
+                <a class="navbar-brand" asp-controller="Home" asp-action="Index">Race<span>Day</span></a>
 
                 @if (signedInName is not null)
                 {
@@ -44,7 +44,7 @@
     </div>
 
     <footer class="border-top footer text-muted">
-        <div class="container">RaceDay — PROG6212 Portfolio of Evidence</div>
+        <div class="container">RaceDay — road running, walking and cycling events across South Africa.</div>
     </footer>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
