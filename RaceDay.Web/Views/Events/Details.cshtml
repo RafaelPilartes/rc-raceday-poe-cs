@@ -1,0 +1,68 @@
+@model EventDetailsViewModel
+@{
+    ViewData["Title"] = Model.Event.EventName;
+    var raceHasBeenRun = Model.Event.EventDate <= DateTime.Now;
+}
+
+@if (!string.IsNullOrEmpty(Model.Event.BannerImageUrl))
+{
+    <img src="@Model.Event.BannerImageUrl" alt="@Model.Event.EventName"
+         class="img-fluid rounded mb-4" style="max-height: 320px; width: 100%; object-fit: cover;" />
+}
+
+<h1 class="h3 page-heading">@Model.Event.EventName</h1>
+
+<div class="row g-4">
+    <div class="col-lg-7">
+        <p class="text-muted">
+            @Model.Event.EventDate.ToString("dddd d MMMM yyyy, HH:mm")<br />
+            @Model.Event.Location<br />
+            <span class="badge text-bg-light">@Model.Event.EventType</span> @Model.Event.DistanceKm km ·
+            organised by @Model.Event.OrganiserName
+        </p>
+
+        @if (!string.IsNullOrWhiteSpace(Model.Event.Description))
+        {
+            <p>@Model.Event.Description</p>
+        }
+
+        @if (raceHasBeenRun)
+        {
+            <div class="alert alert-secondary">This race has already taken place.</div>
+        }
+    </div>
+
+    <div class="col-lg-5">
+        <div class="card p-3">
+            <h2 class="h6 mb-3">Categories</h2>
+
+            @if (Model.Categories.Count == 0)
+            {
+                <p class="text-muted mb-0">The organiser has not opened any categories yet.</p>
+            }
+            else
+            {
+                <ul class="list-unstyled mb-0">
+                    @foreach (var category in Model.Categories)
+                    {
+                        <li class="mb-2">
+                            <span class="fw-semibold">@category.CategoryName</span>
+                            <div class="text-muted small">
+                                @if (category.MinAge is not null || category.MaxAge is not null)
+                                {
+                                    @($"Ages {category.MinAge?.ToString() ?? "any"} to {category.MaxAge?.ToString() ?? "any"}")
+                                    <text> · </text>
+                                }
+                                @(category.DistanceKm is null ? $"{Model.Event.DistanceKm} km" : $"{category.DistanceKm} km")
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-link">Back to all races</a>
+</div>

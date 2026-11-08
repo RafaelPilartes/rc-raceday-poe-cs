@@ -30,6 +30,15 @@
                     </ul>
                 }
 
+                @if (signedInRole == RoleNames.Participant)
+                {
+                    <ul class="navbar-nav me-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Events" asp-action="Index">Find a race</a>
+                        </li>
+                    </ul>
+                }
+
                 @if (signedInName is not null)
                 {
                     <div class="d-flex align-items-center gap-3 ms-auto">

@@ -14,7 +14,7 @@ public class HomeController : Controller
             return RedirectToAction("Index", "Dashboard");
         }
 
-        return View();
+        return RedirectToAction("Index", "Events");
     }
 
     public IActionResult Error()
