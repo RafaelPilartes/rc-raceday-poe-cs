@@ -19,7 +19,9 @@
             <a asp-controller="EventCategories" asp-action="Index" asp-route-eventId="@Model.EventId"
                class="btn btn-outline-primary btn-sm d-block mb-2">Categories</a>
             <a asp-controller="EventEntries" asp-action="Index" asp-route-eventId="@Model.EventId"
-               class="btn btn-outline-primary btn-sm d-block">Entries</a>
+               class="btn btn-outline-primary btn-sm d-block mb-2">Entries</a>
+            <a asp-controller="EventResults" asp-action="Index" asp-route-eventId="@Model.EventId"
+               class="btn btn-outline-primary btn-sm d-block">Results</a>
         </div>
     </div>
 </div>
