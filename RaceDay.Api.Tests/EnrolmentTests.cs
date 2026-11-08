@@ -151,4 +151,30 @@ public class EnrolmentTests
 
         Assert.Equal(StatusCodes.Status403Forbidden, TestHarness.StatusCodeOf(response));
     }
+
+    [Fact]
+    public async Task The_start_list_shows_the_result_once_one_has_been_captured()
+    {
+        using var db = TestHarness.NewDatabase();
+        var organiser = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za");
+        var finisher = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za", "Sipho Dlamini");
+        var stillWaiting = db.AddUser(RoleNames.Participant, "lerato.mokoena@raceday.co.za", "Lerato Mokoena");
+        var raceEvent = db.AddEvent(organiser.UserId, "Coastal 10K", DateTime.Now.AddMonths(-1));
+        var category = db.AddCategory(raceEvent.EventId);
+        var finished = db.AddEnrolment(finisher.UserId, raceEvent.EventId, category.CategoryId);
+        db.AddEnrolment(stillWaiting.UserId, raceEvent.EventId, category.CategoryId);
+        db.AddResult(finished.EnrolmentId, "00:52:18", 47);
+        var controller = new EnrolmentsController(db).SignedInAs(organiser);
+
+        var response = await controller.GetEnrolmentsForEvent(raceEvent.EventId);
+
+        var startList = TestHarness.BodyOf<List<EventEnrolmentResponse>>(response.Result);
+        var withResult = startList.Single(entry => entry.ParticipantName == "Sipho Dlamini");
+        var withoutResult = startList.Single(entry => entry.ParticipantName == "Lerato Mokoena");
+
+        Assert.Equal("00:52:18", withResult.FinishTime);
+        Assert.Equal(47, withResult.FinishingPosition);
+        Assert.Null(withoutResult.FinishTime);
+        Assert.Null(withoutResult.FinishingPosition);
+    }
 }

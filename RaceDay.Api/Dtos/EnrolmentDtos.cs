@@ -32,4 +32,6 @@ public record EventEnrolmentResponse(
     int CategoryId,
     string CategoryName,
     DateTime EnrolmentDate,
-    string Status);
+    string Status,
+    string? FinishTime,
+    int? FinishingPosition);

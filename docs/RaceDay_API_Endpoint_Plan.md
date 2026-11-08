@@ -47,7 +47,7 @@ Part 3 added four endpoints and widened two existing ones, all marked below: the
 | ----------- | -------------------------------- | ------------------------------------------------------------------------------ | ----------------- | -------------- | ------------------------------------------------------------------------------------------------------------------- |
 | POST        | /api/events/{eventId}/enrolments | Enrols the logged-in Participant into the event under a chosen category.       | Participant       | { categoryId } | 201 Created with the new enrolment. 400 Bad Request. 403 Forbidden. 409 Conflict if already enrolled in that event. |
 | GET         | /api/enrolments/my               | Lists the logged-in Participant's own enrolments and their status.             | Participant       | None           | 200 OK with an array of enrolments.                                                                                 |
-| GET         | /api/events/{eventId}/enrolments | Lists every Participant enrolled in an event owned by the logged-in Organiser. | Organiser (owner) | None           | 200 OK with an array of enrolments. 403 Forbidden.                                                                  |
+| GET         | /api/events/{eventId}/enrolments | Lists every Participant enrolled in an event owned by the logged-in Organiser, with the finish time and position once captured. | Organiser (owner) | None           | 200 OK with an array of enrolments. 403 Forbidden.                                                                  |
 
 ## Results
 

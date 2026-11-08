@@ -151,20 +151,40 @@ public class EnrolmentsController : RaceDayControllerBase
             return Forbidden("You can only see the entries for events you created.");
         }
 
-        var enrolments = await db.Enrolments
+        var rows = await db.Enrolments
             .Where(e => e.EventId == eventId)
             .OrderBy(e => e.Category.CategoryName)
             .ThenBy(e => e.Participant.FullName)
-            .Select(e => new EventEnrolmentResponse(
+            .Select(e => new
+            {
                 e.EnrolmentId,
                 e.ParticipantId,
-                e.Participant.FullName,
-                e.Participant.Email,
+                ParticipantName = e.Participant.FullName,
+                ParticipantEmail = e.Participant.Email,
                 e.CategoryId,
-                e.Category.CategoryName,
+                CategoryName = e.Category.CategoryName,
                 e.EnrolmentDate,
-                e.Status))
+                e.Status,
+                FinishTime = e.Result != null ? e.Result.FinishTime : null,
+                FinishingPosition = e.Result != null ? e.Result.FinishingPosition : null
+            })
             .ToListAsync();
+
+        // Formatted after the query because SQL Server cannot translate
+        // TimeSpan.ToString(format).
+        var enrolments = rows
+            .Select(row => new EventEnrolmentResponse(
+                row.EnrolmentId,
+                row.ParticipantId,
+                row.ParticipantName,
+                row.ParticipantEmail,
+                row.CategoryId,
+                row.CategoryName,
+                row.EnrolmentDate,
+                row.Status,
+                row.FinishTime?.ToString(@"hh\:mm\:ss"),
+                row.FinishingPosition))
+            .ToList();
 
         return Ok(enrolments);
     }
