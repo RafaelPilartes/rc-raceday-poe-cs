@@ -26,7 +26,7 @@ public class EventManagementTests
     {
         using var db = TestHarness.NewDatabase();
         var organiser = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za", "Thabo Nkosi");
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var response = await controller.CreateEvent(ValidEvent());
 
@@ -44,7 +44,7 @@ public class EventManagementTests
     {
         using var db = TestHarness.NewDatabase();
         var organiser = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za");
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var response = await controller.CreateEvent(ValidEvent("Swim"));
 
@@ -58,7 +58,7 @@ public class EventManagementTests
         using var db = TestHarness.NewDatabase();
         var organiser = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za");
         var raceEvent = db.AddEvent(organiser.UserId);
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var changes = ValidEvent(EventTypes.Walk);
         changes.EventName = "Cape Town Coastal 10K Walk";
@@ -81,7 +81,7 @@ public class EventManagementTests
         var owner = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za", "Thabo Nkosi");
         var otherOrganiser = db.AddUser(RoleNames.Organiser, "amanda.vdm@raceday.co.za", "Amanda van der Merwe");
         var raceEvent = db.AddEvent(owner.UserId);
-        var controller = new EventsController(db).SignedInAs(otherOrganiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(otherOrganiser);
 
         var response = await controller.UpdateEvent(raceEvent.EventId, ValidEvent());
 
@@ -94,7 +94,7 @@ public class EventManagementTests
     {
         using var db = TestHarness.NewDatabase();
         var organiser = db.AddUser(RoleNames.Organiser, "thabo.nkosi@raceday.co.za");
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var response = await controller.UpdateEvent(4321, ValidEvent());
 
@@ -109,7 +109,7 @@ public class EventManagementTests
         var raceEvent = db.AddEvent(organiser.UserId);
         db.AddCategory(raceEvent.EventId);
         db.AddCategory(raceEvent.EventId, "Veteran 40+");
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var result = await controller.DeleteEvent(raceEvent.EventId);
 
@@ -127,7 +127,7 @@ public class EventManagementTests
         var raceEvent = db.AddEvent(organiser.UserId);
         var category = db.AddCategory(raceEvent.EventId);
         db.AddEnrolment(participant.UserId, raceEvent.EventId, category.CategoryId);
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var result = await controller.DeleteEvent(raceEvent.EventId);
 
@@ -144,8 +144,8 @@ public class EventManagementTests
         db.AddEvent(organiser.UserId, "Later race", new DateTime(2026, 11, 8, 6, 30, 0));
         db.AddEvent(organiser.UserId, "Earlier race", new DateTime(2026, 6, 15, 7, 0, 0));
 
-        var asParticipant = await new EventsController(db).SignedInAs(participant).GetEvents(null, null, null);
-        var asOrganiser = await new EventsController(db).SignedInAs(organiser).GetEvents(null, null, null);
+        var asParticipant = await new EventsController(db, new FakeBlobStorage()).SignedInAs(participant).GetEvents(null, null, null);
+        var asOrganiser = await new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser).GetEvents(null, null, null);
 
         var participantView = TestHarness.BodyOf<List<EventSummaryResponse>>(asParticipant.Result);
         var organiserView = TestHarness.BodyOf<List<EventSummaryResponse>>(asOrganiser.Result);
@@ -163,7 +163,7 @@ public class EventManagementTests
         var cycleEvent = db.AddEvent(organiser.UserId, "City Cycle Challenge");
         cycleEvent.EventType = EventTypes.Cycle;
         db.SaveChanges();
-        var controller = new EventsController(db).SignedInAs(organiser);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
         var response = await controller.GetEvents(null, null, "cycle");
 
@@ -176,7 +176,7 @@ public class EventManagementTests
     {
         using var db = TestHarness.NewDatabase();
         var participant = db.AddUser(RoleNames.Participant, "sipho.dlamini@raceday.co.za");
-        var controller = new EventsController(db).SignedInAs(participant);
+        var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(participant);
 
         var response = await controller.GetEvent(4321);
 

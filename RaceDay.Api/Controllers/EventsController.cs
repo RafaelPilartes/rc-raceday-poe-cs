@@ -4,6 +4,7 @@ using RaceDay.Api.Data;
 using RaceDay.Api.Dtos;
 using RaceDay.Api.Models;
 using RaceDay.Api.Security;
+using RaceDay.Api.Services;
 
 namespace RaceDay.Api.Controllers;
 
@@ -18,10 +19,12 @@ namespace RaceDay.Api.Controllers;
 public class EventsController : RaceDayControllerBase
 {
     private readonly RaceDayDbContext db;
+    private readonly IBlobStorageService blobStorage;
 
-    public EventsController(RaceDayDbContext db)
+    public EventsController(RaceDayDbContext db, IBlobStorageService blobStorage)
     {
         this.db = db;
+        this.blobStorage = blobStorage;
     }
 
     /// <summary>Lists events, soonest race date first, with optional filters.</summary>
@@ -266,6 +269,58 @@ public class EventsController : RaceDayControllerBase
         await db.SaveChangesAsync();
 
         return NoContent();
+    }
+
+    /// <summary>Uploads a banner image for an event the logged-in Organiser owns.</summary>
+    /// <remarks>
+    /// The file goes to Azure Blob Storage and the event keeps the public URL it
+    /// came back with. Uploading again replaces the link; the previous image is
+    /// left in the container.
+    /// </remarks>
+    /// <param name="id">The event id.</param>
+    /// <param name="bannerFile">A JPEG, PNG or WebP image of 5 MB or less.</param>
+    /// <response code="200">The event with its new banner URL.</response>
+    /// <response code="400">No file was sent, or it is too large or not an image.</response>
+    /// <response code="401">No active session.</response>
+    /// <response code="403">The caller is a Participant, or an Organiser who does not own this event.</response>
+    /// <response code="404">No event with that id.</response>
+    [HttpPost("{id:int}/banner")]
+    [SessionAuthorize(RoleNames.Organiser)]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(EventDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<EventDetailResponse>> UploadBanner(int id, IFormFile? bannerFile)
+    {
+        var raceEvent = await db.Events
+            .Include(e => e.Organiser)
+            .SingleOrDefaultAsync(e => e.EventId == id);
+
+        if (raceEvent is null)
+        {
+            return NotFound(new MessageResponse($"No event with id {id}."));
+        }
+
+        if (raceEvent.OrganiserId != CurrentUserId)
+        {
+            return Forbidden("You can only change the banner on events you created.");
+        }
+
+        var problem = ImageUpload.FindProblem(bannerFile);
+        if (problem is not null)
+        {
+            return BadRequest(new MessageResponse(problem));
+        }
+
+        await using var content = bannerFile!.OpenReadStream();
+        raceEvent.BannerImageUrl = await blobStorage.UploadImageAsync(
+            content, bannerFile.FileName, bannerFile.ContentType);
+
+        await db.SaveChangesAsync();
+
+        return Ok(Describe(raceEvent, raceEvent.Organiser.FullName));
     }
 
     private static string? Blank(string? value)

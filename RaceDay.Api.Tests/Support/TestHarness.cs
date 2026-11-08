@@ -135,6 +135,19 @@ internal static class TestHarness
         return result;
     }
 
+    public static IFormFile ImageFile(
+        string fileName = "banner.jpg",
+        string contentType = "image/jpeg",
+        int sizeInBytes = 2048)
+    {
+        var content = new MemoryStream(new byte[sizeInBytes]);
+        return new FormFile(content, 0, content.Length, "file", fileName)
+        {
+            Headers = new HeaderDictionary(),
+            ContentType = contentType
+        };
+    }
+
     /// <summary>Hands the controller a session that is logged in as this user.</summary>
     public static TController SignedInAs<TController>(this TController controller, User user)
         where TController : ControllerBase
