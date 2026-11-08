@@ -1,4 +1,4 @@
-name: Part 2 build and test
+name: Build and test
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-test:
-    name: Build the API and run the unit tests
+    name: Build the API and the MVC app, and run the unit tests
     runs-on: ubuntu-latest
 
     steps:
@@ -29,3 +29,8 @@ jobs:
       # SQL Server instance of its own.
       - name: Unit tests
         run: dotnet test RaceDay.sln --configuration Release --no-build --logger "console;verbosity=normal"
+
+      # The MVC app is the only project that ships in a container, so the image
+      # is built here too rather than only on a developer machine.
+      - name: Build the MVC container image
+        run: docker build -f RaceDay.Web/Dockerfile -t raceday-web .
