@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.vscode/
+**/.git/
+**/.github/
+**/docs/
+**/*.user
+**/appsettings.Development.json
+RaceDay.Api/
+RaceDay.Api.Tests/
