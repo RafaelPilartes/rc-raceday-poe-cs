@@ -13,6 +13,13 @@
             <a asp-action="Index" class="btn btn-link">Back to my events</a>
         </form>
     </div>
+    <div class="col-lg-4">
+        <div class="card p-3">
+            <h2 class="h6">This event</h2>
+            <a asp-controller="EventCategories" asp-action="Index" asp-route-eventId="@Model.EventId"
+               class="btn btn-outline-primary btn-sm">Categories</a>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
