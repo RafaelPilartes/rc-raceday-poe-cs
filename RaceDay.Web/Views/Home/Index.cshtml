@@ -1,8 +1,10 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
+    var fullName = Context.Session.GetFullName();
+    var roleName = Context.Session.GetRoleName();
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="py-4">
+    <h1 class="h3">Welcome back, @fullName</h1>
+    <p class="text-muted">Signed in as @roleName.</p>
 </div>
