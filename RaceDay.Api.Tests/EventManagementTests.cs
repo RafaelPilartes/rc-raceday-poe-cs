@@ -144,8 +144,8 @@ public class EventManagementTests
         db.AddEvent(organiser.UserId, "Later race", new DateTime(2026, 11, 8, 6, 30, 0));
         db.AddEvent(organiser.UserId, "Earlier race", new DateTime(2026, 6, 15, 7, 0, 0));
 
-        var asParticipant = await new EventsController(db, new FakeBlobStorage()).SignedInAs(participant).GetEvents(null, null, null);
-        var asOrganiser = await new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser).GetEvents(null, null, null);
+        var asParticipant = await new EventsController(db, new FakeBlobStorage()).SignedInAs(participant).GetEvents(null, null, null, null);
+        var asOrganiser = await new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser).GetEvents(null, null, null, null);
 
         var participantView = TestHarness.BodyOf<List<EventSummaryResponse>>(asParticipant.Result);
         var organiserView = TestHarness.BodyOf<List<EventSummaryResponse>>(asOrganiser.Result);
@@ -165,7 +165,7 @@ public class EventManagementTests
         db.SaveChanges();
         var controller = new EventsController(db, new FakeBlobStorage()).SignedInAs(organiser);
 
-        var response = await controller.GetEvents(null, null, "cycle");
+        var response = await controller.GetEvents(null, null, "cycle", null);
 
         var events = TestHarness.BodyOf<List<EventSummaryResponse>>(response.Result);
         Assert.Equal("City Cycle Challenge", Assert.Single(events).EventName);

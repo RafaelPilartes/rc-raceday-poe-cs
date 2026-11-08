@@ -35,6 +35,7 @@ public class EventsController : RaceDayControllerBase
     /// <param name="date">Only events taking place on this calendar day.</param>
     /// <param name="location">Only events whose location contains this text.</param>
     /// <param name="eventType">Run, Walk or Cycle.</param>
+    /// <param name="upcomingOnly">True to leave out events that have already taken place.</param>
     /// <response code="200">The matching events.</response>
     /// <response code="400">The event type filter was not Run, Walk or Cycle.</response>
     /// <response code="401">No active session.</response>
@@ -45,9 +46,16 @@ public class EventsController : RaceDayControllerBase
     public async Task<ActionResult<IEnumerable<EventSummaryResponse>>> GetEvents(
         [FromQuery] DateTime? date,
         [FromQuery] string? location,
-        [FromQuery] string? eventType)
+        [FromQuery] string? eventType,
+        [FromQuery] bool? upcomingOnly)
     {
         var query = db.Events.Include(e => e.Organiser).AsQueryable();
+
+        if (upcomingOnly == true)
+        {
+            var now = DateTime.Now;
+            query = query.Where(e => e.EventDate >= now);
+        }
 
         if (date is not null)
         {
@@ -84,6 +92,39 @@ public class EventsController : RaceDayControllerBase
                 e.EventType,
                 e.BannerImageUrl,
                 e.Organiser.FullName))
+            .ToListAsync();
+
+        return Ok(events);
+    }
+
+    /// <summary>Lists the events the logged-in Organiser created.</summary>
+    /// <remarks>
+    /// Each row carries how many participants have entered, which is what the
+    /// Organiser dashboard shows without having to ask for every event's entries
+    /// one at a time.
+    /// </remarks>
+    /// <response code="200">The caller's own events, soonest first.</response>
+    /// <response code="401">No active session.</response>
+    /// <response code="403">The caller is logged in as a Participant.</response>
+    [HttpGet("my")]
+    [SessionAuthorize(RoleNames.Organiser)]
+    [ProducesResponseType(typeof(IEnumerable<OrganiserEventResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<IEnumerable<OrganiserEventResponse>>> GetMyEvents()
+    {
+        var events = await db.Events
+            .Where(e => e.OrganiserId == CurrentUserId)
+            .OrderBy(e => e.EventDate)
+            .Select(e => new OrganiserEventResponse(
+                e.EventId,
+                e.EventName,
+                e.EventDate,
+                e.Location,
+                e.DistanceKm,
+                e.EventType,
+                e.BannerImageUrl,
+                e.Enrolments.Count))
             .ToListAsync();
 
         return Ok(events);

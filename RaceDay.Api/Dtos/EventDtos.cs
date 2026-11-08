@@ -13,6 +13,17 @@ public record EventSummaryResponse(
     string? BannerImageUrl,
     string OrganiserName);
 
+/// <summary>One of the Organiser's own events, with how many people have entered it.</summary>
+public record OrganiserEventResponse(
+    int EventId,
+    string EventName,
+    DateTime EventDate,
+    string Location,
+    decimal DistanceKm,
+    string EventType,
+    string? BannerImageUrl,
+    int EnrolmentCount);
+
 /// <summary>Everything stored about a single event.</summary>
 public record EventDetailResponse(
     int EventId,
