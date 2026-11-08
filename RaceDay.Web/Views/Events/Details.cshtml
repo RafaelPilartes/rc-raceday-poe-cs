@@ -58,6 +58,22 @@
                         </li>
                     }
                 </ul>
+
+                @if (Context.Session.GetRoleName() == RoleNames.Participant && !raceHasBeenRun)
+                {
+                    <hr />
+                    <form asp-controller="MyEntries" asp-action="Enrol" method="post">
+                        <input type="hidden" name="eventId" value="@Model.Event.EventId" />
+                        <label for="selectedCategoryId" class="form-label">Enter this race</label>
+                        <select id="selectedCategoryId" name="selectedCategoryId" class="form-select mb-2">
+                            @foreach (var category in Model.Categories)
+                            {
+                                <option value="@category.CategoryId">@category.CategoryName</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100">Enter race</button>
+                    </form>
+                }
             }
         </div>
     </div>

@@ -34,3 +34,13 @@ public class CaptureResultViewModel
     [Display(Name = "Position")]
     public int FinishingPosition { get; set; }
 }
+
+public record MyEntry(
+    int EnrolmentId,
+    int EventId,
+    string EventName,
+    DateTime EventDate,
+    int CategoryId,
+    string CategoryName,
+    DateTime EnrolmentDate,
+    string Status);
