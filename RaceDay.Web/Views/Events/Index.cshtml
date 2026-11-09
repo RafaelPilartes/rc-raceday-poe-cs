@@ -3,7 +3,9 @@
     ViewData["Title"] = "Events";
 }
 
-<h1 class="h3 page-heading">Find a race</h1>
+<div class="page-header">
+    <div><h1>Find a race</h1></div>
+</div>
 
 <form asp-action="Index" method="get" class="card p-3 mb-4">
     <div class="row g-3 align-items-end">
@@ -37,8 +39,9 @@
 
 @if (Model.Events.Count == 0)
 {
-    <div class="card p-4 text-center text-muted">
-        No races match that search. Try widening it.
+    <div class="card empty-state">
+        <p>No races match that search.</p>
+        <div><a asp-action="Index" class="btn btn-outline-primary">Clear the filters</a></div>
     </div>
 }
 else
@@ -47,20 +50,28 @@ else
         @foreach (var raceEvent in Model.Events)
         {
             <div class="col-md-6 col-lg-4">
-                <div class="card h-100">
+                <div class="card race-card">
                     @if (!string.IsNullOrEmpty(raceEvent.BannerImageUrl))
                     {
-                        <img src="@raceEvent.BannerImageUrl" alt="@raceEvent.EventName" class="card-event-banner" />
+                        <img src="@raceEvent.BannerImageUrl" alt="" class="race-card__banner" />
                     }
-                    <div class="card-body d-flex flex-column">
-                        <h2 class="h5">@raceEvent.EventName</h2>
-                        <p class="text-muted mb-2">
-                            @raceEvent.EventDate.ToString("d MMM yyyy HH:mm")<br />
-                            @raceEvent.Location
-                        </p>
-                        <p class="mb-3"><span class="badge text-bg-light">@raceEvent.EventType</span> @raceEvent.DistanceKm km</p>
-                        <a asp-action="Details" asp-route-id="@raceEvent.EventId"
-                           class="btn btn-outline-primary mt-auto">View race</a>
+                    else
+                    {
+                        <div class="race-card__banner race-card__banner--empty">RaceDay</div>
+                    }
+
+                    <div class="card-body">
+                        <div class="race-card__date">@raceEvent.EventDate.ToString("ddd d MMM yyyy")</div>
+                        <h2 class="h5 mt-1 mb-2">
+                            <a class="quiet-link stretched-link" asp-action="Details" asp-route-id="@raceEvent.EventId">
+                                @raceEvent.EventName
+                            </a>
+                        </h2>
+                        <p class="race-meta mb-3">@raceEvent.Location</p>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="type-tag">@raceEvent.EventType</span>
+                            <span class="race-meta numeric">@raceEvent.DistanceKm km</span>
+                        </div>
                     </div>
                 </div>
             </div>

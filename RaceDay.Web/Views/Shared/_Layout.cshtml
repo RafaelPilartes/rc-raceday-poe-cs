@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - RaceDay</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
@@ -11,54 +15,62 @@
     @{
         var signedInName = Context.Session.GetFullName();
         var signedInRole = Context.Session.GetRoleName();
+        var currentSection = ViewContext.RouteData.Values["controller"]?.ToString();
+
+        string ActiveWhen(string controller) => currentSection == controller ? "nav-link active" : "nav-link";
     }
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark navbar-raceday mb-4">
+        <nav class="navbar navbar-expand-md navbar-dark navbar-raceday mb-4">
             <div class="container">
                 <a class="navbar-brand" asp-controller="Home" asp-action="Index">Race<span>Day</span></a>
 
-                @if (signedInRole == RoleNames.Organiser)
-                {
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="MyEvents" asp-action="Index">My events</a>
-                        </li>
-                    </ul>
-                }
-
-                @if (signedInRole == RoleNames.Participant)
-                {
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="Events" asp-action="Index">Find a race</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="MyEntries" asp-action="Index">My entries</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" asp-controller="MyResults" asp-action="Index">My results</a>
-                        </li>
-                    </ul>
-                }
-
                 @if (signedInName is not null)
                 {
-                    <div class="d-flex align-items-center gap-3 ms-auto">
-                        <a class="nav-link" asp-controller="Profile" asp-action="Index">@signedInName (@signedInRole)</a>
-                        <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
-                            <button type="submit" class="btn btn-sm btn-outline-light">Sign out</button>
-                        </form>
+                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#mainNav" aria-controls="mainNav"
+                            aria-expanded="false" aria-label="Show navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse" id="mainNav">
+                        <ul class="navbar-nav me-auto ms-md-4 my-3 my-md-0">
+                            @if (signedInRole == RoleNames.Organiser)
+                            {
+                                <li class="nav-item">
+                                    <a class="@ActiveWhen("Dashboard")" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="@ActiveWhen("MyEvents")" asp-controller="MyEvents" asp-action="Index">My events</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a class="@ActiveWhen("Events")" asp-controller="Events" asp-action="Index">Find a race</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="@ActiveWhen("MyEntries")" asp-controller="MyEntries" asp-action="Index">My entries</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="@ActiveWhen("MyResults")" asp-controller="MyResults" asp-action="Index">My results</a>
+                                </li>
+                            }
+                        </ul>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <a class="account-link" asp-controller="Profile" asp-action="Index">
+                                @signedInName <span class="d-none d-lg-inline">(@signedInRole)</span>
+                            </a>
+                            <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                                <button type="submit" class="btn btn-sm btn-outline-light">Sign out</button>
+                            </form>
+                        </div>
                     </div>
                 }
-                else
+                else if (currentSection != "Account")
                 {
-                    <div class="ms-auto">
-                        <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Sign in</a>
-                    </div>
+                    <a class="btn btn-sm btn-outline-light" asp-controller="Account" asp-action="Login">Sign in</a>
                 }
             </div>
         </nav>
@@ -79,7 +91,7 @@
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
+    <footer class="footer">
         <div class="container">RaceDay — road running, walking and cycling events across South Africa.</div>
     </footer>
 

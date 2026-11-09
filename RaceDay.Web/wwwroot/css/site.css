@@ -1,152 +1,516 @@
+/* RaceDay design tokens -------------------------------------------------- */
+
 :root {
-    --raceday-navy: #12263f;
-    --raceday-navy-dark: #0b1a2d;
-    --raceday-orange: #ef5b25;
-    --raceday-orange-dark: #d44a17;
-    --raceday-sand: #f5f3ef;
-    --raceday-line: #e0dcd5;
-    --raceday-confirmed: #1d7a4c;
-    --raceday-pending: #b9701a;
-    --raceday-cancelled: #6b6b6b;
+    --navy: #12263f;
+    --navy-soft: #3d5872;
+    --navy-faint: #5c7089;
+    --orange: #e2521c;
+    --orange-dark: #bf4214;
+    --orange-deep: #a93910;
+    --orange-wash: #fdf0ea;
+    --sand: #f4f2ee;
+    --paper: #ffffff;
+    --rule: #e2ddd5;
+    --rule-strong: #cdc6ba;
+
+    --confirmed: #176a44;
+    --confirmed-wash: #e4f2ea;
+    --pending: #9a5a0d;
+    --pending-wash: #fbf0dd;
+    --cancelled: #646464;
+    --cancelled-wash: #eceae7;
+
+    --ui-font: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --display-font: "Barlow Condensed", "Barlow", "Segoe UI", system-ui, sans-serif;
+
+    --radius: 4px;
 }
+
+/* Typography ------------------------------------------------------------- */
 
 body {
-    background-color: var(--raceday-sand);
-    color: var(--raceday-navy);
-    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+    background-color: var(--sand);
+    color: var(--navy);
+    font-family: var(--ui-font);
+    font-size: 1rem;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
 }
 
-h1, h2, h3, h4 {
-    font-weight: 700;
-    letter-spacing: -0.01em;
+h1, h2, h3, h4, .display-face {
+    font-family: var(--display-font);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    line-height: 1.1;
 }
+
+h1 {
+    font-size: 2.6rem;
+    text-transform: uppercase;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+/* Times, distances, positions and counts line up column by column. */
+.numeric {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--navy-faint);
+}
+
+.lead-note {
+    color: var(--navy-soft);
+}
+
+/* Browser surfaces ------------------------------------------------------- */
+
+::selection {
+    background: var(--navy);
+    color: #fff;
+}
+
+:focus-visible {
+    outline: 2px solid var(--orange);
+    outline-offset: 2px;
+}
+
+input, textarea, select {
+    caret-color: var(--orange);
+    accent-color: var(--orange);
+}
+
+a {
+    color: var(--orange-dark);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
+}
+
+a:hover {
+    color: var(--navy);
+}
+
+/* Links that sit inside tables and cards carry their own weight instead of
+   the default underline. */
+a.quiet-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.quiet-link:hover {
+    color: var(--orange-dark);
+    text-decoration: underline;
+}
+
+/* Navigation ------------------------------------------------------------- */
 
 .navbar-raceday {
-    background-color: var(--raceday-navy);
+    background-color: var(--navy);
+    padding-top: 0.85rem;
+    padding-bottom: 0.85rem;
 }
 
 .navbar-raceday .navbar-brand {
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    font-family: var(--display-font);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
     color: #fff;
 }
 
 .navbar-raceday .navbar-brand span {
-    color: var(--raceday-orange);
+    color: var(--orange);
 }
 
 .navbar-raceday .nav-link {
-    color: rgba(255, 255, 255, 0.78);
-    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 500;
+    padding-left: 0;
+    padding-right: 0;
+    margin-right: 1.5rem;
+    border-bottom: 2px solid transparent;
 }
 
-.navbar-raceday .nav-link:hover,
+.navbar-raceday .nav-link:hover {
+    color: #fff;
+}
+
 .navbar-raceday .nav-link.active {
     color: #fff;
-    border-bottom: 2px solid var(--raceday-orange);
+    border-bottom-color: var(--orange);
 }
 
-.navbar-raceday .navbar-text {
-    color: rgba(255, 255, 255, 0.78);
+.navbar-raceday .navbar-text,
+.navbar-raceday .account-link {
+    color: rgba(255, 255, 255, 0.72);
+    font-weight: 500;
+    text-decoration: none;
 }
 
-.btn-primary {
-    background-color: var(--raceday-orange);
-    border-color: var(--raceday-orange);
+.navbar-raceday .account-link:hover {
+    color: #fff;
+}
+
+.navbar-raceday .navbar-toggler {
+    border-color: rgba(255, 255, 255, 0.35);
+}
+
+/* Page furniture --------------------------------------------------------- */
+
+.page-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--rule);
+}
+
+.page-header h1 {
+    margin-bottom: 0.15rem;
+}
+
+.page-header .lead-note {
+    margin-bottom: 0;
+}
+
+.footer {
+    border-top: 1px solid var(--rule);
+    padding: 1.5rem 0;
+    margin-top: 4rem;
+    color: var(--navy-faint);
+    font-size: 0.9rem;
+}
+
+/* Surfaces --------------------------------------------------------------- */
+
+.card {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(18, 38, 63, 0.05);
+}
+
+.empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--navy-soft);
+}
+
+.empty-state p {
+    margin-bottom: 1rem;
+}
+
+/* The dashboard numbers read as one instrument panel rather than three
+   separate cards. */
+.metric-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    margin-bottom: 2.5rem;
+}
+
+.metric {
+    padding: 1.25rem 1.5rem;
+    border-left: 1px solid var(--rule);
+}
+
+.metric:first-child {
+    border-left: 0;
+}
+
+.metric-value {
+    font-family: var(--display-font);
+    font-size: 2.75rem;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+}
+
+.metric .label {
+    display: block;
+    margin-top: 0.4rem;
+}
+
+@media (max-width: 575.98px) {
+    .metric-strip {
+        grid-template-columns: 1fr;
+    }
+
+    .metric {
+        border-left: 0;
+        border-top: 1px solid var(--rule);
+    }
+
+    .metric:first-child {
+        border-top: 0;
+    }
+}
+
+/* Tables ----------------------------------------------------------------- */
+
+.table {
+    margin-bottom: 0;
+    color: var(--navy);
+    --bs-table-bg: transparent;
+}
+
+.table > thead th {
+    font-size: 0.75rem;
     font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--navy-faint);
+    background: transparent;
+    border-bottom: 1px solid var(--rule-strong);
+    padding: 0.85rem 1rem;
+    white-space: nowrap;
+}
+
+.table > tbody td {
+    padding: 0.95rem 1rem;
+    border-top: 1px solid var(--rule);
+    border-bottom: 0;
+    vertical-align: middle;
+}
+
+.table > tbody tr:first-child td {
+    border-top: 0;
+}
+
+.table-hover > tbody tr:hover > * {
+    background-color: var(--orange-wash);
+}
+
+.cell-note {
+    color: var(--navy-faint);
+    font-size: 0.85rem;
+}
+
+/* Buttons and controls --------------------------------------------------- */
+
+.btn {
+    font-weight: 600;
+    border-radius: var(--radius);
+}
+
+/* The darker orange, not the accent one: white on the accent sits at 3.9:1,
+   under the 4.5:1 a button label needs at this size. */
+.btn-primary {
+    background-color: var(--orange-dark);
+    border-color: var(--orange-dark);
 }
 
 .btn-primary:hover,
 .btn-primary:focus {
-    background-color: var(--raceday-orange-dark);
-    border-color: var(--raceday-orange-dark);
+    background-color: var(--orange-deep);
+    border-color: var(--orange-deep);
+}
+
+.btn-primary:disabled {
+    background-color: var(--rule-strong);
+    border-color: var(--rule-strong);
+    opacity: 1;
 }
 
 .btn-outline-primary {
-    color: var(--raceday-orange);
-    border-color: var(--raceday-orange);
-    font-weight: 600;
+    color: var(--orange-dark);
+    border-color: var(--rule-strong);
 }
 
 .btn-outline-primary:hover {
-    background-color: var(--raceday-orange);
-    border-color: var(--raceday-orange);
+    background-color: var(--orange-dark);
+    border-color: var(--orange-dark);
+    color: #fff;
 }
 
-.page-heading {
-    border-bottom: 3px solid var(--raceday-orange);
-    display: inline-block;
-    padding-bottom: 0.25rem;
-    margin-bottom: 1.5rem;
+.btn-outline-secondary {
+    color: var(--navy-soft);
+    border-color: var(--rule-strong);
 }
 
-.card {
-    border: 1px solid var(--raceday-line);
-    border-radius: 0.5rem;
+.btn-outline-secondary:hover {
+    background-color: var(--navy);
+    border-color: var(--navy);
 }
 
-.card-event-banner {
-    height: 160px;
-    object-fit: cover;
-    width: 100%;
-    border-radius: 0.5rem 0.5rem 0 0;
+/* Bootstrap gives .btn-link its own blue, which the brand link colour on
+   plain anchors never reaches. */
+.btn-link {
+    color: var(--orange-dark);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.18em;
 }
 
-.stat-tile {
-    background: #fff;
-    border: 1px solid var(--raceday-line);
-    border-left: 4px solid var(--raceday-orange);
-    border-radius: 0.5rem;
-    padding: 1rem 1.25rem;
+.btn-link:hover {
+    color: var(--navy);
 }
 
-.stat-tile .stat-value {
-    font-size: 2rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.stat-tile .stat-label {
-    color: #5c6b7c;
+.form-label {
     font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-weight: 600;
+    color: var(--navy-soft);
+    margin-bottom: 0.35rem;
 }
+
+.form-control, .form-select {
+    border-color: var(--rule-strong);
+    border-radius: var(--radius);
+    color: var(--navy);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: var(--orange);
+    box-shadow: none;
+}
+
+.form-control:disabled {
+    background-color: var(--sand);
+    color: var(--navy-faint);
+}
+
+.form-text {
+    color: var(--navy-faint);
+}
+
+/* Status ----------------------------------------------------------------- */
 
 .status-badge {
     display: inline-block;
     padding: 0.2rem 0.6rem;
     border-radius: 999px;
-    font-size: 0.78rem;
-    font-weight: 700;
+    font-size: 0.72rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.07em;
     border: 1px solid transparent;
 }
 
 .status-confirmed {
-    background-color: #e3f3ea;
-    color: var(--raceday-confirmed);
-    border-color: #bfe2cf;
+    background-color: var(--confirmed-wash);
+    color: var(--confirmed);
+    border-color: #c2e0d0;
 }
 
 .status-pending {
-    background-color: #fdf1e0;
-    color: var(--raceday-pending);
-    border-color: #f2d8b2;
+    background-color: var(--pending-wash);
+    color: var(--pending);
+    border-color: #ecd4a8;
 }
 
 .status-cancelled {
-    background-color: #ececec;
-    color: var(--raceday-cancelled);
-    border-color: #d8d8d8;
-    text-decoration: line-through;
+    background-color: var(--cancelled-wash);
+    color: var(--cancelled);
+    border-color: var(--rule-strong);
 }
 
-.footer {
-    border-top: 1px solid var(--raceday-line);
-    padding: 1.25rem 0;
-    margin-top: 3rem;
-    font-size: 0.9rem;
+/* Race cards ------------------------------------------------------------- */
+
+.race-card {
+    position: relative;
+    height: 100%;
+    overflow: hidden;
+    transition: box-shadow 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.race-card:hover {
+    box-shadow: 0 6px 18px rgba(18, 38, 63, 0.12);
+    transform: translateY(-2px);
+}
+
+.race-card__banner {
+    aspect-ratio: 16 / 9;
+    width: 100%;
+    object-fit: cover;
+    display: block;
+    background: var(--navy);
+}
+
+.race-card__banner--empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--display-font);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.28);
+}
+
+.race-card__date {
+    font-family: var(--display-font);
+    font-size: 1.1rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--orange-dark);
+    font-variant-numeric: tabular-nums;
+}
+
+.race-meta {
+    color: var(--navy-soft);
+    font-size: 0.92rem;
+}
+
+.type-tag {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--radius);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--navy-soft);
+}
+
+.race-hero {
+    aspect-ratio: 21 / 9;
+    max-height: 380px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: var(--radius);
+    background: var(--navy);
+}
+
+
+/* Sign in and register --------------------------------------------------- */
+
+.auth-shell {
+    max-width: 26rem;
+    margin: 2rem auto 0;
+}
+
+.auth-card {
+    padding: 2rem;
+}
+
+.auth-card h1 {
+    font-size: 1.9rem;
+    margin-bottom: 1.5rem;
+}
+
+.notice-page {
+    max-width: 30rem;
+    margin: 3rem auto;
+    text-align: center;
+}
+
+.notice-page h1 {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
 }

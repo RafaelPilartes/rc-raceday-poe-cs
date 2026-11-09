@@ -6,20 +6,22 @@
 
 @if (!string.IsNullOrEmpty(Model.Event.BannerImageUrl))
 {
-    <img src="@Model.Event.BannerImageUrl" alt="@Model.Event.EventName"
-         class="img-fluid rounded mb-4" style="max-height: 320px; width: 100%; object-fit: cover;" />
+    <img src="@Model.Event.BannerImageUrl" alt="" class="race-hero mb-4" />
 }
 
-<h1 class="h3 page-heading">@Model.Event.EventName</h1>
+<div class="page-header">
+    <div><h1>@Model.Event.EventName</h1></div>
+</div>
 
 <div class="row g-4">
     <div class="col-lg-7">
-        <p class="text-muted">
-            @Model.Event.EventDate.ToString("dddd d MMMM yyyy, HH:mm")<br />
-            @Model.Event.Location<br />
-            <span class="badge text-bg-light">@Model.Event.EventType</span> @Model.Event.DistanceKm km ·
-            organised by @Model.Event.OrganiserName
-        </p>
+        <p class="race-card__date mb-1">@Model.Event.EventDate.ToString("dddd d MMMM yyyy, HH:mm")</p>
+        <p class="race-meta mb-3">@Model.Event.Location</p>
+        <div class="d-flex align-items-center gap-2 mb-4">
+            <span class="type-tag">@Model.Event.EventType</span>
+            <span class="race-meta numeric">@Model.Event.DistanceKm km</span>
+            <span class="race-meta">· organised by @Model.Event.OrganiserName</span>
+        </div>
 
         @if (!string.IsNullOrWhiteSpace(Model.Event.Description))
         {
